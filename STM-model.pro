@@ -1,4 +1,4 @@
-QT = core
+QT += widgets
 
 CONFIG += c++17 cmdline
 
