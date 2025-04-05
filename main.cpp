@@ -2,38 +2,81 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPainter>
+#include <QPainterPath>
 #include <QPushButton>
 #include <QWidget>
 
-#define Z0 10    // тунельынй зазор [5, 7, 15]
-#define UT 0.01  // Ut тунельное напряжение [0.1]
-#define FI0 4.5  // Fi0 локальная работа элетронов
-#define EF 5.71  // Ef уровень Ферми
+class Data {
+  // Данные для варианта №20
+  int h[3] = {5, 3, 7};
+  int d[3] = {10, 2, 3};
+  float z0 = 10.0;  // тунельынй зазор [5, 7, 15]
+  float Ut = 0.01;  // Ut тунельное напряжение [0.1]
+  float Fi0 = 4.5;  // Fi0 локальная работа элетронов
+  float Ef = 5.71;  // Ef уровень Ферми
+                    //
+                    // QPoint surfaceNodes[10] = {QPoint(0, 0), QPoint(0, 4)};
+
+ public:
+  double getI(int Z) {
+    // сразу приведено к наноамперам и аргстремам
+    // return 1620*U*E*math.e**(-1.025*Z*(fi(Z))**0.5)
+    double I = 0;
+    return I;
+  }
+};
+
+class SurfaceCanva : public QWidget {
+  int surfaceNodes[10][2] = {{0, 0},  {0, 4},  {7, 4},   {7, 7},   {10, 7},
+                             {10, 0}, {15, 0}, {15, 10}, {20, 10}, {30, 0}};
+
+  void paintEvent(QPaintEvent*) {
+    QPainter painter;
+    QPainterPath path;
+    float surfaceScale = 20;
+    path.moveTo(-10 * surfaceScale, 0);
+    for (int i = 0; i < 10; ++i)
+      path.lineTo(surfaceNodes[i][0] * surfaceScale,
+                  -surfaceNodes[i][1] * surfaceScale);
+    path.lineTo((surfaceNodes[10][0] + 10) * surfaceScale, 0);
+    painter.begin(this);
+    painter.translate(width() * 0.1,
+                      height() * 0.9);  // утсновка начала координат
+    // painter.scale(1, 1);
+    painter.strokePath(path, QPen(Qt::black));
+    painter.end();
+  }
+};
 
 int main(int argc, char* argv[]) {
   QApplication app(argc, argv);
+  // mainwindow parametrs
   QWidget* mainWidget = new QWidget();
   mainWidget->setWindowTitle("Модель СТМ");
-  mainWidget->setMinimumHeight(1050);
-  mainWidget->setMinimumWidth(1920);
+  mainWidget->setMinimumHeight(500);
+  mainWidget->setMinimumWidth(1000);
+  // layout
   QHBoxLayout* mainLaout = new QHBoxLayout();
   mainWidget->setLayout(mainLaout);
   QVBoxLayout* leftPanel = new QVBoxLayout();
   mainLaout->addLayout(leftPanel);
 
-  QLabel* label = new QLabel();
-  leftPanel->addWidget(label);
-  leftPanel->addWidget(new QPushButton());
-  label->setText("Вариант 20");
+  QLabel* labelVar = new QLabel();
+  leftPanel->addWidget(labelVar);
+  labelVar->setText("Вариант 20");
+  labelVar->setMaximumWidth(100);
 
-  QWidget* canva = new QWidget();
+  leftPanel->addStretch();
+
+  SurfaceCanva* canva = new SurfaceCanva();
   mainLaout->addWidget(canva);
   QPalette pal = QPalette();
   pal.setColor(QPalette::Window, Qt::white);
-
   canva->setAutoFillBackground(true);
   canva->setPalette(pal);
 
-  mainWidget->show();  // отображаем виджет
+  // Отрисовка поверхности
+
+  mainWidget->show();
   return app.exec();
 }
