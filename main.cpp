@@ -7,9 +7,6 @@
 #include <QWidget>
 
 class Data {
-  // Данные для варианта №20
-  int h[3] = {5, 3, 7};
-  int d[3] = {10, 2, 3};
   float z0 = 10.0;  // тунельынй зазор [5, 7, 15]
   float Ut = 0.01;  // Ut тунельное напряжение [0.1]
   float Fi0 = 4.5;  // Fi0 локальная работа элетронов
@@ -27,6 +24,7 @@ class Data {
 };
 
 class SurfaceCanva : public QWidget {
+  // Точки исходной поверхности Варианта 20
   int surfaceNodes[10][2] = {{0, 0},  {0, 4},  {7, 4},   {7, 7},   {10, 7},
                              {10, 0}, {15, 0}, {15, 10}, {20, 10}, {30, 0}};
 
@@ -40,10 +38,12 @@ class SurfaceCanva : public QWidget {
                   -surfaceNodes[i][1] * surfaceScale);
     path.lineTo((surfaceNodes[10][0] + 10) * surfaceScale, 0);
     painter.begin(this);
+    painter.drawRect(0, 0, width() - 1, height() - 1);
     painter.translate(width() * 0.1,
                       height() * 0.9);  // утсновка начала координат
     // painter.scale(1, 1);
     painter.strokePath(path, QPen(Qt::black));
+
     painter.end();
   }
 };
@@ -64,7 +64,12 @@ int main(int argc, char* argv[]) {
   QLabel* labelVar = new QLabel();
   leftPanel->addWidget(labelVar);
   labelVar->setText("Вариант 20");
-  labelVar->setMaximumWidth(100);
+  labelVar->setMaximumWidth(150);
+
+  QLabel* labelCur = new QLabel();
+  leftPanel->addWidget(labelCur);
+  labelCur->setText("Текущий ток: чч");
+  labelCur->setMaximumWidth(150);
 
   leftPanel->addStretch();
 
@@ -74,8 +79,6 @@ int main(int argc, char* argv[]) {
   pal.setColor(QPalette::Window, Qt::white);
   canva->setAutoFillBackground(true);
   canva->setPalette(pal);
-
-  // Отрисовка поверхности
 
   mainWidget->show();
   return app.exec();
