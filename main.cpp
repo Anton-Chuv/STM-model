@@ -6,22 +6,7 @@
 #include <QPushButton>
 #include <QWidget>
 
-class Data {
-  float z0 = 10.0;  // тунельынй зазор [5, 7, 15]
-  float Ut = 0.01;  // Ut тунельное напряжение [0.1]
-  float Fi0 = 4.5;  // Fi0 локальная работа элетронов
-  float Ef = 5.71;  // Ef уровень Ферми
-                    //
-                    // QPoint surfaceNodes[10] = {QPoint(0, 0), QPoint(0, 4)};
-
- public:
-  double getI(int Z) {
-    // сразу приведено к наноамперам и аргстремам
-    // return 1620*U*E*math.e**(-1.025*Z*(fi(Z))**0.5)
-    double I = 0;
-    return I;
-  }
-};
+#include "datamodel.h"
 
 class SurfaceCanva : public QWidget {
   // Точки исходной поверхности Варианта 20
@@ -66,9 +51,13 @@ int main(int argc, char* argv[]) {
   labelVar->setText("Вариант 20");
   labelVar->setMaximumWidth(150);
 
+  DataModel* model = new DataModel();
+
   QLabel* labelCur = new QLabel();
   leftPanel->addWidget(labelCur);
-  labelCur->setText("Текущий ток: чч");
+  QString CurValue = "Текущий ток: ";
+  CurValue.append(QString::number(model->getI(-1)));
+  labelCur->setText(CurValue);
   labelCur->setMaximumWidth(150);
 
   leftPanel->addStretch();
