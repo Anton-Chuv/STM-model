@@ -9,7 +9,7 @@ DataModel::DataModel() {  // default value for variant 20
 
 double DataModel::getI(int Z) {
   // сразу приведено к наноамперам и аргстремам
-  // return 1620*U*E*math.e**(-1.025*Z*(fi(Z))**0.5)
+  // return 1620*Ut*Ef*math.e**(-1.025*Z*(fi(Z))**0.5)
   double I = 0;
   return I;
 }
