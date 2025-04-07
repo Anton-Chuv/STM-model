@@ -9,7 +9,7 @@ class DataModel {
 
  public:
   DataModel();
-  double getI(int Z);
+  double getI(float Z);
 };
 
 #endif  // DATAMODEL_H

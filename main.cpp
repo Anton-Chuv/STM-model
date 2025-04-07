@@ -49,16 +49,16 @@ int main(int argc, char* argv[]) {
   QLabel* labelVar = new QLabel();
   leftPanel->addWidget(labelVar);
   labelVar->setText("Вариант 20");
-  labelVar->setMaximumWidth(150);
+  labelVar->setMaximumWidth(100);
 
   DataModel* model = new DataModel();
 
   QLabel* labelCur = new QLabel();
   leftPanel->addWidget(labelCur);
-  QString CurValue = "Текущий ток: ";
-  CurValue.append(QString::number(model->getI(-1)));
+  QString CurValue = "Эталонный ток: ";
+  CurValue.append(QString::number(model->getI(10)));
   labelCur->setText(CurValue);
-  labelCur->setMaximumWidth(150);
+  labelCur->setMaximumWidth(300);
 
   leftPanel->addStretch();
 
