@@ -24,7 +24,7 @@ class SurfaceCanva : public QWidget {
     path.lineTo((surfaceNodes[10][0] + 10) * surfaceScale, 0);
     painter.begin(this);
     painter.drawRect(0, 0, width() - 1, height() - 1);
-    painter.translate(width() * 0.1,
+    painter.translate(width() * 0.15,
                       height() * 0.9);  // утсновка начала координат
     // painter.scale(1, 1);
     painter.strokePath(path, QPen(Qt::black));
@@ -56,9 +56,9 @@ int main(int argc, char* argv[]) {
   QLabel* labelCur = new QLabel();
   leftPanel->addWidget(labelCur);
   QString CurValue = "Эталонный ток: ";
-  CurValue.append(QString::number(model->getI(10)));
+  CurValue.append(QString::number(model->getI(0, 10)));
   labelCur->setText(CurValue);
-  labelCur->setMaximumWidth(300);
+  labelCur->setMaximumWidth(200);
 
   leftPanel->addStretch();
 
