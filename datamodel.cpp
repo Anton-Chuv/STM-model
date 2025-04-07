@@ -4,15 +4,46 @@
 #include <QtMath>
 
 DataModel::DataModel() {  // default value for variant 20
-  z0 = 10.0;              // тунельынй зазор [5, 7, 15]
+  z0_ = 10.0;             // тунельынй зазор [5, 7, 15]
   // Ut = 0.01;              // Ut тунельное напряжение [0.1]
   // Fi0 = 4.5;              // Fi0 локальная работа элетронов
   // Ef = 5.71;              // Ef уровень Ферми
+  etalonI_ = etalonI();
+  for (int i = 0; i < 50 * 10; ++i) {
+    prof[i][0] = i * 0.1 - 10;
+    prof[i][1] = 20;
+  }
+
+  for (int i = 1; i < 50 * 10; ++i) {
+    prof[i][1] = prof[i - 1][1];
+    double I = getI(prof[i][0], prof[i][1]);
+    while (etalonI_ > I * (1 + 0.01) || etalonI_ < I * (1 - 0.01)) {
+      if (etalonI_ > I * (1 + 0.01)) prof[i][1] += 0.01;
+      if (etalonI_ < I * (1 - 0.01)) prof[i][1] -= 0.01;
+
+      I = getI(prof[i][0], prof[i][1]);
+    }
+  }
 }
+float DataModel::z0() { return z0_; }
+double DataModel::etalonI() { return getI(-10, z0_); }
 
 // const float z0 = 10.0;
 int surfaceNodes[10][2] = {{0, 0},  {0, 4},  {7, 4},   {7, 7},   {10, 7},
                            {10, 0}, {15, 0}, {15, 10}, {20, 10}, {30, 0}};
+double getXhiegth(double x) {
+  if (x < 0) return 0;
+  for (int i = 0; i < 10 - 1; ++i) {
+    if (x <= surfaceNodes[i + 1][0]) {
+      if (surfaceNodes[i][0] == surfaceNodes[i + 1][0]) i++;
+      return surfaceNodes[i][1] +
+             (surfaceNodes[i + 1][1] - surfaceNodes[i][1]) *
+                 (x - surfaceNodes[i][0]) /
+                 (surfaceNodes[i + 1][0] - surfaceNodes[i][0]);
+    }
+  }
+  return 0;
+}
 
 const float U_t = 0.01;
 const float Fi0 = 4.5;
@@ -38,21 +69,22 @@ double getJ(double Z) {
 double DataModel::getI(float X, float Z) {
   float I = 0;
   float d = 10;  // +- x, +- y
-  int n = 10000000;
+  int n = 10000;
   int s = 0;
+
+  double z = 10;
   QRandomGenerator rnd;
   for (int i = 0; i < n; i++) {
     double x = X + rnd.generateDouble() * 2 * d - d;
     double y = rnd.generateDouble() * 2 * d - d;
-    double z0 = 3;
     double j = rnd.generateDouble() * 1620 * U_t * E_f *
-               qPow(M_E, (-1.025 * z0 * qSqrt(fi(z0))));
-    double dist = qSqrt(qPow(X - x, 2) + qPow(y, 2) + qPow(Z - 0, 2));
-    // TODO выше ноль поменять на высоту в точке x
+               qPow(M_E, (-1.025 * z * qSqrt(fi(z))));
+    double H = getXhiegth(x);
+    double dist = qSqrt(qPow(X - x, 2) + qPow(y, 2) + qPow(Z - H, 2));
     double j0 = getJ(dist);
     if (j0 <= j) s++;
   }
   I = d * d * 2 * 2 * 1620 * U_t * E_f *
-      qPow(M_E, (-1.025 * z0 * qSqrt(fi(z0)))) / n * s;
+      qPow(M_E, (-1.025 * z * qSqrt(fi(z)))) / n * s;
   return I;
 }
