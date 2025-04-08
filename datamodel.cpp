@@ -4,22 +4,22 @@
 #include <QtMath>
 
 DataModel::DataModel() {  // default value for variant 20
-  z0_ = 10.0;             // тунельынй зазор [5, 7, 15]
+  z0_ = 4;                // тунельынй зазор [5, 7, 15]
   // Ut = 0.01;              // Ut тунельное напряжение [0.1]
   // Fi0 = 4.5;              // Fi0 локальная работа элетронов
   // Ef = 5.71;              // Ef уровень Ферми
   etalonI_ = etalonI();
   for (int i = 0; i < 50 * 10; ++i) {
     prof[i][0] = i * 0.1 - 10;
-    prof[i][1] = 20;
+    prof[i][1] = z0_;
   }
 
   for (int i = 1; i < 50 * 10; ++i) {
     prof[i][1] = prof[i - 1][1];
     double I = getI(prof[i][0], prof[i][1]);
-    while (etalonI_ > I * (1 + 0.01) || etalonI_ < I * (1 - 0.01)) {
-      if (etalonI_ > I * (1 + 0.01)) prof[i][1] += 0.01;
-      if (etalonI_ < I * (1 - 0.01)) prof[i][1] -= 0.01;
+    while (etalonI_ * (1 + 0.01) < I || etalonI_ * (1 - 0.01) > I) {
+      if (etalonI_ * (1 + 0.01) < I) prof[i][1] -= 0.01;
+      if (etalonI_ * (1 - 0.01) > I) prof[i][1] += 0.01;
 
       I = getI(prof[i][0], prof[i][1]);
     }
@@ -68,11 +68,11 @@ double getJ(double Z) {
 
 double DataModel::getI(float X, float Z) {
   float I = 0;
-  float d = 10;  // +- x, +- y
-  int n = 10000;
+  float d = z0_;  // +- x, +- y
+  int n = 5000;
   int s = 0;
 
-  double z = 10;
+  double z = z0_ * 1;
   QRandomGenerator rnd;
   for (int i = 0; i < n; i++) {
     double x = X + rnd.generateDouble() * 2 * d - d;
@@ -80,11 +80,52 @@ double DataModel::getI(float X, float Z) {
     double j = rnd.generateDouble() * 1620 * U_t * E_f *
                qPow(M_E, (-1.025 * z * qSqrt(fi(z))));
     double H = getXhiegth(x);
+    // if (H > Z) {
+    // H = Z;
+    // }
+
     double dist = qSqrt(qPow(X - x, 2) + qPow(y, 2) + qPow(Z - H, 2));
     double j0 = getJ(dist);
     if (j0 <= j) s++;
   }
+
   I = d * d * 2 * 2 * 1620 * U_t * E_f *
       qPow(M_E, (-1.025 * z * qSqrt(fi(z)))) / n * s;
+
+  // тоже самое но для вериткальных поверхностей
+  s = 0;
+  int countVsurface = 0;
+  for (int j = 0; j < 10 - 1; ++j) {
+    if (surfaceNodes[j][0] == surfaceNodes[j + 1][0] &&
+        ((surfaceNodes[j][1] < surfaceNodes[j + 1][1] &&
+          surfaceNodes[j][0] > X) ||
+         (surfaceNodes[j][1] > surfaceNodes[j + 1][1] &&
+          surfaceNodes[j][0] < X))) {
+      countVsurface++;
+      for (int i = 0; i < n; i++) {
+        int maxy = surfaceNodes[j][1] > surfaceNodes[j + 1][1]
+                       ? surfaceNodes[j][1]
+                       : surfaceNodes[j + 1][1];
+        int miny = surfaceNodes[j][1] < surfaceNodes[j + 1][1]
+                       ? surfaceNodes[j][1]
+                       : surfaceNodes[j + 1][1];
+        double x = Z + rnd.generateDouble() * 2 * d - d;
+        double H = surfaceNodes[j][0] - X;
+        if (x > maxy || x < miny) {
+          x = -100000;
+        }
+        double y = rnd.generateDouble() * 2 * d - d;
+        double j = rnd.generateDouble() * 1620 * U_t * E_f *
+                   qPow(M_E, (-1.025 * z * qSqrt(fi(z))));
+        double dist = qSqrt(qPow(y, 2) + qPow(H, 2) + qPow(Z - x, 2));
+        double j0 = getJ(dist);
+        if (j0 <= j) s++;
+      }
+    }
+  }
+  if (countVsurface)
+    I += d * d * 2 * 2 * 1620 * U_t * E_f *
+         qPow(M_E, (-1.025 * z * qSqrt(fi(z)))) / n * s / countVsurface;
+
   return I;
 }

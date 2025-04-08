@@ -69,8 +69,8 @@ int main(int argc, char* argv[]) {
 
   QLabel* labelCur = new QLabel();
   leftPanel->addWidget(labelCur);
-  QString CurValue = "Эталонный ток: ";
-  CurValue.append(QString::number(model->etalonI()));
+  QString CurValue = "Высота: ";
+  CurValue.append(QString::number(model->z0()));
   labelCur->setText(CurValue);
   labelCur->setMaximumWidth(200);
 
