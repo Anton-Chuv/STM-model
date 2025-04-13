@@ -2,9 +2,8 @@
 
 #include <QRandomGenerator>
 #include <QtMath>
-
-DataModel::DataModel() {  // default value for variant 20
-  z0_ = 4;                // тунельынй зазор [5, 7, 15]
+DataModel::DataModel() : QObject() {  // default value for variant 20
+  z0_ = 4;                            // тунельынй зазор [5, 7, 15]
   // Ut = 0.01;              // Ut тунельное напряжение [0.1]
   // Fi0 = 4.5;              // Fi0 локальная работа элетронов
   // Ef = 5.71;              // Ef уровень Ферми
@@ -17,9 +16,25 @@ DataModel::DataModel() {  // default value for variant 20
   for (int i = 1; i < 50 * 10; ++i) {
     prof[i][1] = prof[i - 1][1];
     double I = getI(prof[i][0], prof[i][1]);
+    // double z1 = prof[i][1];
+    // double z2 = prof[i][1] * 2;
     while (etalonI_ * (1 + 0.01) < I || etalonI_ * (1 - 0.01) > I) {
-      if (etalonI_ * (1 + 0.01) < I) prof[i][1] -= 0.01;
-      if (etalonI_ * (1 - 0.01) > I) prof[i][1] += 0.01;
+      // I = a * e^b*z
+      // double I1 = getI(prof[i][0], z1);
+      // double I2 = getI(prof[i][0], z2);
+      // double b = qLn(I1 / I2) / (z1 - z2);
+      // double a = I1 / qExp(b * z1);
+
+      if (etalonI_ * (1 + 0.01) < I) prof[i][1] -= z0_ * 0.01;
+      if (etalonI_ * (1 - 0.01) > I) prof[i][1] += z0_ * 0.01;
+      // if (qLn(etalonI_ / a) / b > z1) {
+      // z1 = z2;
+      // z2 = qLn(etalonI_ / a) / b;
+      // prof[i][1] = z2;
+      // } else {
+      // z1 = qLn(etalonI_ / a) / b;
+      // prof[i][1] = z1;
+      // }
 
       I = getI(prof[i][0], prof[i][1]);
     }
@@ -128,4 +143,50 @@ double DataModel::getI(float X, float Z) {
          qPow(M_E, (-1.025 * z * qSqrt(fi(z)))) / n * s / countVsurface;
 
   return I;
+}
+
+void DataModel::recalculate() {
+  etalonI_ = etalonI();
+  for (int i = 0; i < 50 * 10; ++i) {
+    prof[i][0] = i * 0.1 - 10;
+    prof[i][1] = z0_;
+  }
+
+  for (int i = 1; i < 50 * 10; ++i) {
+    prof[i][1] = prof[i - 1][1];
+    double I = getI(prof[i][0], prof[i][1]);
+    // double z1 = prof[i][1];
+    // double z2 = prof[i][1] * 2;
+    while (etalonI_ * (1 + 0.01) < I || etalonI_ * (1 - 0.01) > I) {
+      // I = a * e^b*z
+      // double I1 = getI(prof[i][0], z1);
+      // double I2 = getI(prof[i][0], z2);
+      // double b = qLn(I1 / I2) / (z1 - z2);
+      // double a = I1 / qExp(b * z1);
+
+      if (etalonI_ * (1 + 0.01) < I) prof[i][1] -= z0_ * 0.01;
+      if (etalonI_ * (1 - 0.01) > I) prof[i][1] += z0_ * 0.01;
+      // if (qLn(etalonI_ / a) / b > z1) {
+      // z1 = z2;
+      // z2 = qLn(etalonI_ / a) / b;
+      // prof[i][1] = z2;
+      // } else {
+      // z1 = qLn(etalonI_ / a) / b;
+      // prof[i][1] = z1;
+      // }
+
+      I = getI(prof[i][0], prof[i][1]);
+    }
+  }
+}
+
+void DataModel::z0plus() {
+  z0_++;
+  recalculate();
+}
+void DataModel::z0minus() {
+  if (z0_ > 3) {
+    z0_--;
+    recalculate();
+  }
 }

@@ -1,7 +1,9 @@
 #ifndef DATAMODEL_H
 #define DATAMODEL_H
 
-class DataModel {
+#include <QObject>
+
+class DataModel : public QObject {
   float z0_;  // тунельынй зазор [5, 7, 15]
   float Ut;   // Ut тунельное напряжение [0.1]
   float Fi0;  // Fi0 локальная работа элетронов
@@ -15,6 +17,11 @@ class DataModel {
 
   DataModel();
   double getI(float X, float Z);
+  void recalculate();
+ public slots:
+
+  void z0plus();
+  void z0minus();
 };
 
 #endif  // DATAMODEL_H
