@@ -100,14 +100,16 @@ int main(int argc, char* argv[]) {
   canva->setPalette(pal);
 
   QObject::connect(z0plus, &QPushButton::clicked, model, &DataModel::z0plus);
-  QObject::connect(z0plus, &QPushButton::clicked, labelCur,
-                   [=]() { labelCur->setText(QString::number(model->z0())); });
+  QObject::connect(z0plus, &QPushButton::clicked, labelCur, [=]() {
+    labelCur->setText(QString("Высота: ") + QString::number(model->z0()));
+  });
   QObject::connect(z0plus, &QPushButton::clicked, canva,
                    [=]() { canva->redraw(model->prof); });
 
   QObject::connect(z0minus, &QPushButton::clicked, model, &DataModel::z0minus);
-  QObject::connect(z0minus, &QPushButton::clicked, labelCur,
-                   [=]() { labelCur->setText(QString::number(model->z0())); });
+  QObject::connect(z0minus, &QPushButton::clicked, labelCur, [=]() {
+    labelCur->setText(QString("Высота: ") + QString::number(model->z0()));
+  });
   QObject::connect(z0minus, &QPushButton::clicked, canva,
                    [=]() { canva->redraw(model->prof); });
 
